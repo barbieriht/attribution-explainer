@@ -1,5 +1,7 @@
 # Attribution Explainer
 
+**Live: https://barbieriht.github.io/attribution-explainer/** · [Português](https://barbieriht.github.io/attribution-explainer/index.pt.html)
+
 An interactive, in-browser explainer of Study I of the author's PhD: when
 several physical fields are inferred together, where does the dependence
 between them in the posterior come from — the measurement operator or the
