@@ -1,7 +1,7 @@
 /*
  * Testbed (a) of Study I, written to match the thesis code exactly
  * (fwi_common.testbeds.linear_gaussian and fwi_common.bases; checked against it by
- * tests/testbed.test.js on a fixture the Python code produced).
+ * tests/attribution.test.js on a fixture the Python code produced).
  *
  * Fields. Two 16 x 16 fields. Field k = Phi_k [z_shared; z_k] + scatter * noise, with
  * Phi_k the leading `latentDim` modes of a squared-exponential spectrum (correlation

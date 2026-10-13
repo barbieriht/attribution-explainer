@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Attribution Explainer</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2711%27 cy=%2716%27 r=%278%27 fill=%27none%27 stroke=%27%231f5fa8%27 stroke-width=%273%27/%3E%3Ccircle cx=%2721%27 cy=%2716%27 r=%278%27 fill=%27none%27 stroke=%27%23b8440f%27 stroke-width=%273%27/%3E%3C/svg%3E">
+  <meta name="description" content="Interactive explainer of Study I: where the dependence between jointly inferred fields comes from, the operator or the prior, computed exactly in your browser.">
+  <meta name="author" content="Thiago Barbieri">
+  <link rel="alternate" hreflang="en" href="index.html">
+  <link rel="alternate" hreflang="pt-BR" href="index.pt.html">
+  <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/explainer.css">
+  <script src="assets/js/theme.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Site">
+      <a class="brand" href="#top">Attribution Explainer</a>
+      <div class="lang-switch" role="group" aria-label="Language" data-lang-switch>
+        <a href="index.html" hreflang="en" lang="en" aria-current="true">EN</a>
+        <a href="index.pt.html" hreflang="pt-BR" lang="pt-BR">PT</a>
+      </div>
+      <button type="button" class="theme-toggle" data-theme-toggle data-label-dark="Switch to dark theme" data-label-light="Switch to light theme"></button>
+    </nav>
+  </header>
+  <main id="content">
+    <div id="top"></div>
+    <h1>Where does crosstalk come from?</h1>
+    <p class="lede">When several maps of the subsurface are inferred together, they come out tied to one another. Study I of this PhD asks who tied them: the physics of the measurement, or the prior knowledge fed to the inversion. It then measures the answer. Every number in the demos below is computed exactly in your browser. Open any section to read it.</p>
+    <div class="section-tools">
+      <button type="button" data-sections="expand">Expand all</button>
+      <button type="button" data-sections="collapse">Collapse all</button>
+    </div>
+
+    <details class="section" id="problem">
+      <summary><h2 class="section-title">Two linked fields</h2><span class="section-sub">What crosstalk is</span></summary>
+      <div class="section-body">
+        <p class="lede">We cannot dig under a region to see its rocks. We send waves into the ground, record the echo at the surface, and let a computer reconstruct maps of the rock properties that would explain it.</p>
+        <p>In practice we want several maps at once: for example, the speed of compressional waves and the speed of shear waves. Here we call them simply <strong>field 1</strong> and <strong>field 2</strong>.</p>
+        <p>The data never tell the whole story, so the honest answer is not a single map but a collection of possible maps, all compatible with what was measured. Statisticians call that collection the <strong>posterior distribution</strong>. Looking at it, a pattern shows up: where one possible map has field 1 higher at some point, field 2 tends to be higher (or lower) at the same point. The fields are <strong>linked</strong>.</p>
+        <p>Geophysicists call this link <strong>crosstalk</strong>, or interparameter trade-off: part of what appears in one map may really be a trace of the other <a class="cite" href="#operto2013" data-cite="operto2013">(Operto et al., 2013)</a>. It matters, because decisions such as where to drill or how to interpret a rock are made by reading these maps.</p>
+
+        <h3>Links can also be put in on purpose</h3>
+        <p>Before any data arrive, the inversion already holds a belief about what the fields look like: the <strong>prior</strong>. In the testbed of this study the prior builds each field from a few smooth patterns, and a fraction \(s\) of those patterns is shared by both fields. With \(s = 0\) the fields are independent; with \(s = 1\) they move together. Draw a few pairs and watch the cloud of points tilt as \(s\) grows.</p>
+
+        <section class="demo wide" id="prior-demo" aria-labelledby="pd-title">
+          <h4 id="pd-title">Try it: draw two fields from the prior</h4>
+          <div class="demo-panels three">
+            <figure>
+              <canvas class="field" data-role="field1" role="img" aria-label="Field 1, 16 by 16 points"></canvas>
+              <figcaption>Field 1 (16 × 16 points)</figcaption>
+            </figure>
+            <figure>
+              <canvas class="field" data-role="field2" role="img" aria-label="Field 2, 16 by 16 points"></canvas>
+              <figcaption>Field 2, same colour scale</figcaption>
+            </figure>
+            <figure>
+              <div data-role="scatter"></div>
+              <figcaption>Each dot is one of the 256 points: field 1 across, field 2 up.</figcaption>
+            </figure>
+          </div>
+          <div class="legend-diverging" aria-hidden="true"><span>low</span><span class="legend-bar-diverging"></span><span>high</span></div>
+          <div class="controls">
+            <label class="control"><span class="label">Shared fraction s = <output data-role="shared-value">0.5</output></span>
+              <input type="range" data-role="shared" min="0" max="1" step="0.125" value="0.5"></label>
+            <div class="button-row"><button type="button" data-role="redraw">Draw another pair</button></div>
+          </div>
+          <p class="demo-readout" data-role="readout" aria-live="polite"></p>
+        </section>
+        <p>The link you see in an inversion result could therefore have been put there by the prior, by the measurement, or by both. The rest of this page is about telling them apart.</p>
+      </div>
+    </details>
+
+    <details class="section" id="sources">
+      <summary><h2 class="section-title">Three suspects</h2><span class="section-sub">Operator, prior, network</span></summary>
+      <div class="section-body">
+        <p class="lede">The link between the fields in the posterior can come from three places. In the final map all three are mixed, and nothing shows who did what.</p>
+        <div class="cards">
+          <div class="card"><h3>The operator</h3><p>The physics of the measurement. If each recorded echo depends on both fields at once, the data cannot separate them: they only see a mixture.</p></div>
+          <div class="card"><h3>The prior</h3><p>What was believed before measuring, learned from examples. If in the examples the two fields moved together, that belief enters the answer.</p></div>
+          <div class="card"><h3>The network</h3><p>Today the prior is often a trained neural network (a diffusion model). It may add or remove links that the examples did not have.</p></div>
+        </div>
+
+        <h3>Switching each suspect off</h3>
+        <p>To learn whether a suspect matters, switch it off and see what changes. Each switch is an experiment one can actually run:</p>
+        <ul>
+          <li><strong>Operator off:</strong> observe each field separately, with the same noise. The information about each field stays; only the mixing goes.</li>
+          <li><strong>Prior off:</strong> keep each field's own statistics but make the two independent. Every field still looks the same on its own; only the link between them goes.</li>
+        </ul>
+        <p>Two switches give four combinations. In each, we measure how linked the fields are in the posterior, with a dependence measure \(D\):</p>
+        <table class="metrics coalitions">
+          <thead><tr><th></th><th>operator off</th><th>operator on</th></tr></thead>
+          <tbody>
+            <tr><th>prior off</th><td>\(D(\varnothing)\): what is left with no source</td><td>\(D(O)\): the physics alone</td></tr>
+            <tr><th>prior on</th><td>\(D(P)\): the prior alone</td><td>\(D(OP)\): the real situation, what the scientist sees</td></tr>
+          </tbody>
+        </table>
+
+        <h3>A fair split: the Shapley value</h3>
+        <p>The total change, \(D(OP) - D(\varnothing)\), still has to be split between the suspects. We use the <strong>Shapley value</strong> <a class="cite" href="#shapley1953value" data-cite="shapley1953value">(Shapley, 1953)</a>, a rule from game theory for sharing credit in a group effort: each player's credit is what it adds on joining the group, averaged over every order in which the players could arrive. With two players,</p>
+        \[ \varphi_O = \tfrac12\big[(D(O) - D(\varnothing)) + (D(OP) - D(P))\big], \qquad \varphi_P = \tfrac12\big[(D(P) - D(\varnothing)) + (D(OP) - D(O))\big], \]
+        <p>and the shares always add up to the total: \(\varphi_O + \varphi_P = D(OP) - D(\varnothing)\). The Shapley value already apportions variance among inputs in sensitivity analysis <a class="cite" href="#owen2014shapley" data-cite="owen2014shapley">(Owen, 2014)</a>, also when the inputs are dependent <a class="cite" href="#herin2022pme" data-cite="herin2022pme">(Herin et al., 2022)</a>. Here the players are not inputs drawn from a distribution but switches on the problem itself.</p>
+        <p class="note">A share can be negative: a suspect can <em>remove</em> dependence. That is why the study always reports a dependence measure with a sign.</p>
+      </div>
+    </details>
+
+    <details class="section" id="exact">
+      <summary><h2 class="section-title">The exact case</h2><span class="section-sub">Switch the sources on and off</span></summary>
+      <div class="section-body">
+        <p class="lede">To test the method we need a problem where the right answer is known. The testbed is artificial and fully controlled, and its posterior has a closed form.</p>
+
+        <h3>The testbed</h3>
+        <ul>
+          <li><strong>Fields:</strong> two maps of 16 × 16 points, 512 numbers in all, drawn from the Gaussian prior of the first section with shared fraction \(s\).</li>
+          <li><strong>Measurement:</strong> each field is blurred and sampled every few points (the <em>stride</em>; a larger stride means fewer data). The two fields' data are mixed with a coupling \(\kappa\): at \(\kappa = 0\) each datum sees one field, as \(\kappa\) grows each datum sees more of both.</li>
+          <li><strong>Noise:</strong> Gaussian, with a variance you choose. Small noise and a small stride mean informative data.</li>
+        </ul>
+        <p>With a Gaussian prior of covariance \(C_p\) and a linear measurement \(G\) with noise variance \(\sigma^2\), the posterior is Gaussian too, with covariance</p>
+        \[ C = C_p - C_p G^\top \big(G C_p G^\top + \sigma^2 I\big)^{-1} G C_p . \]
+        <p>From \(C\) we read the dependence between the fields. The main measure is the <strong>mean signed pointwise correlation</strong>: the correlation \(\rho(x)\) between field 1 and field 2 at each point \(x\), averaged over the 256 points. Two others are available: the same average without the sign, and the <strong>mutual information</strong> between the whole fields.</p>
+
+        <section class="demo wide" id="attribution-demo" aria-labelledby="ad-title">
+          <h4 id="ad-title">Try it: switch each source on and off</h4>
+          <div class="scenario-row">
+            <button type="button" data-preset="strong">Informative data</button>
+            <button type="button" data-preset="weak">Weak data</button>
+            <button type="button" data-preset="tug">Tug of war</button>
+            <button type="button" data-preset="confirmatory">A confirmatory point</button>
+          </div>
+          <div class="cell-grid">
+            <figure><canvas class="field" data-role="cell-none" role="img" aria-label="Pointwise correlation map, neither source"></canvas><figcaption><strong>Neither source</strong><br><span data-role="value-none"></span></figcaption></figure>
+            <figure><canvas class="field" data-role="cell-O" role="img" aria-label="Pointwise correlation map, operator only"></canvas><figcaption><strong>Operator only</strong><br><span data-role="value-O"></span></figcaption></figure>
+            <figure><canvas class="field" data-role="cell-P" role="img" aria-label="Pointwise correlation map, prior only"></canvas><figcaption><strong>Prior only</strong><br><span data-role="value-P"></span></figcaption></figure>
+            <figure><canvas class="field" data-role="cell-OP" role="img" aria-label="Pointwise correlation map, both sources"></canvas><figcaption><strong>Both (what you see)</strong><br><span data-role="value-OP"></span></figcaption></figure>
+          </div>
+          <div class="legend-diverging" aria-hidden="true"><span>ρ = −1</span><span class="legend-bar-diverging"></span><span>ρ = +1</span></div>
+          <div class="controls">
+            <label class="control"><span class="label">Operator coupling κ = <output data-role="kappa-value">0.5</output></span>
+              <input type="range" data-role="kappa" min="0" max="0.95" step="0.05" value="0.5"></label>
+            <label class="control"><span class="label">Prior shared fraction s = <output data-role="shared-value">0.75</output></span>
+              <input type="range" data-role="shared" min="0" max="1" step="0.125" value="0.75"></label>
+            <label class="control"><span class="label">Noise variance</span>
+              <select data-role="noise">
+                <option value="0.001">0.001</option>
+                <option value="0.01" selected>0.01</option>
+                <option value="0.1">0.1</option>
+                <option value="1">1</option>
+              </select></label>
+            <label class="control"><span class="label">Stride</span>
+              <select data-role="stride">
+                <option value="2">2 (64 data per field)</option>
+                <option value="4" selected>4 (16 data per field)</option>
+                <option value="8">8 (4 data per field)</option>
+              </select></label>
+            <fieldset>
+              <legend>Dependence measure</legend>
+              <label><input type="radio" name="attr-functional" value="signed" checked> signed correlation</label>
+              <label><input type="radio" name="attr-functional" value="unsigned"> unsigned</label>
+              <label><input type="radio" name="attr-functional" value="mi"> mutual information</label>
+            </fieldset>
+          </div>
+          <div class="chart-block"><div data-role="shares"></div></div>
+          <p class="demo-readout" data-role="readout" aria-live="polite"></p>
+          <p class="demo-status" data-role="status" aria-live="polite"></p>
+        </section>
+
+        <h3>What the exact case shows</h3>
+        <p><strong>How much of the prior survives depends on the data.</strong> Try <em>Informative data</em> and then <em>Weak data</em>. The prior is the same and links the fields strongly, and the operator does not mix them. Yet almost none of the prior's link survives when the data are informative, and nearly all of it when they say little. The data erase the prior belief to the extent that they can speak for themselves; in large samples, prior dependence is in general not retained by the posterior <a class="cite" href="#hagar2023posterior" data-cite="hagar2023posterior">(Hagar &amp; Stevens, 2023)</a>.</p>
+        <p><strong>Operator and prior can pull in opposite directions.</strong> In this testbed the measurement tends to create negative dependence (one field up, the other down) and the prior positive dependence. On the study's grid of settings the two shares had opposite signs in <span data-fill="grid-opposing"></span> of the <span data-fill="grid-coupled"></span> settings where both were present. Try <em>Tug of war</em>: with a prior that ties the fields almost perfectly, the final map still shows a slightly negative link.</p>
+        <div class="callout">
+          <p><strong>In one sentence.</strong> The final map alone can mislead: it can show a negative link that came almost entirely from the measurement, hiding a strongly positive prior belief. An unsigned measure confuses "two forces cancelling" with "the prior removing dependence": with mutual information the prior's share came out negative in <span data-fill="grid-mi-negative"></span> of the <span data-fill="grid-mi-cells"></span> grid settings with a dependent prior. Switch the measure in the demo to see it.</p>
+        </div>
+      </div>
+    </details>
+
+    <details class="section" id="sampling">
+      <summary><h2 class="section-title">Checking the instrument</h2><span class="section-sub">A crooked sampler makes its own links</span></summary>
+      <div class="section-body">
+        <p class="lede">When the prior is a neural network there is no formula for the posterior any more. All we can do is draw possible maps with a program called a <strong>sampler</strong>, and estimate the dependence from those draws.</p>
+        <p>A sampler that is slightly off can create or remove dependence by itself, like a thermometer that reads two degrees high. And more draws do not help: they only make the wrong value more precise. The demo below uses a posterior where the exact answer is known. The <em>bias</em> slider makes the sampler shrink the link between the fields by a fraction \(b\).</p>
+
+        <section class="demo wide" id="sampling-demo" aria-labelledby="sd-title">
+          <h4 id="sd-title">Try it: estimate the dependence from samples</h4>
+          <div class="chart-block"><div data-role="chart"></div></div>
+          <div class="controls">
+            <label class="control"><span class="label">Samples per estimate</span>
+              <select data-role="samples">
+                <option value="16">16</option>
+                <option value="64" selected>64</option>
+                <option value="256">256</option>
+              </select></label>
+            <label class="control"><span class="label">Sampler bias b = <output data-role="bias-value">0</output></span>
+              <input type="range" data-role="bias" min="0" max="0.3" step="0.05" value="0"></label>
+            <div class="button-row"><button type="button" data-role="redraw">Draw again</button></div>
+          </div>
+          <p class="demo-readout" data-role="readout" aria-live="polite"></p>
+          <p class="demo-status">Posterior of one confirmatory point (κ = 0.25, s = 0.75, noise variance 0.1, stride 4), sampled exactly; the biased sampler draws from the same posterior with the cross-field covariance multiplied by 1 − b.</p>
+        </section>
+
+        <h3>How the real sampler was checked</h3>
+        <p>The study's sampler is a twisted sequential Monte Carlo method <a class="cite" href="#wu2023twisted" data-cite="wu2023twisted">(Wu et al., 2023)</a>. Before any result, it had to reproduce exact answers on problems like the one above, in 512 dimensions, within margins fixed in advance. It failed twice, was diagnosed and corrected, and passed on a third, fresh seed, with its worst case at 0.92 of the allowed margin.</p>
+        <p>It was then compared with a sampler built differently, DDSMC <a class="cite" href="#kelvinius2025ddsmc" data-cite="kelvinius2025ddsmc">(Ekström Kelvinius et al., 2025)</a>, and with an ablation of its own twist, on a network trained in 128 dimensions: all 45 comparisons across five independently trained networks agreed, judged against the gap expected between two exact samplers.</p>
+      </div>
+    </details>
+
+    <details class="section" id="hypothesis">
+      <summary><h2 class="section-title">A shortcut, and its test</h2><span class="section-sub">Hypothesis H1, pre-registered</span></summary>
+      <div class="section-body">
+        <p class="lede">Training networks and drawing thousands of maps is expensive. There is a shortcut: replace the network by a <strong>Gaussian surrogate</strong> that keeps only the mean and the correlations of its training examples. For the surrogate the attribution is exact and free, by the formulas of the previous sections.</p>
+        <p>Previous work suggests that diffusion networks in their generalizing regime denoise much like that Gaussian surrogate, at least over a band of noise levels and, for large networks, transiently during training <a class="cite" href="#li2024hidden" data-cite="li2024hidden">(Li et al., 2024)</a>. Hence the study's hypothesis:</p>
+        <div class="callout">
+          <p><strong>Hypothesis H1.</strong> The attribution computed with the Gaussian surrogate predicts the attribution obtained with the trained network: the same order of the shares across settings, and the same total dependence within a fixed tolerance.</p>
+        </div>
+
+        <h3>Rules written before the data</h3>
+        <p>To avoid adjusting the criterion after seeing the result, the test was <strong>pre-registered</strong>: the pass rules, the margins and even the analysis program were written and stored before the experiments ran. When a rule had to change, the change was recorded as a dated amendment, always before the data it would judge existed. Two requirements had to hold together, at eight settings (operator coupling \(\kappa \in \{0.25, 0.75\}\), prior dependence \(s \in \{0.25, 0.75\}\), informative or weak data), with four independently trained networks per setting:</p>
+        <ul>
+          <li><strong>Ranking:</strong> across the eight settings, the surrogate must order each share the way the network does. Agreement is measured with Kendall's \(\tau\), where 1 is perfect agreement; the thresholds were computed in advance from how much \(\tau\) an exactly correct surrogate would lose to estimation noise and training variance.</li>
+          <li><strong>Magnitude:</strong> the predicted total dependence may not be off by more than 4.5% at any of the eight settings.</li>
+        </ul>
+
+        <h3>Is the network copying its examples?</h3>
+        <p>A network that memorizes its training set turns the posterior into a lookup over training examples <a class="cite" href="#siahkoohi2026memorization" data-cite="siahkoohi2026memorization">(Siahkoohi &amp; Sabeddu, 2026)</a>, and the surrogate would not apply. Every network was therefore tested for copying with an exact test that counts near-duplicates of training examples against those of held-out examples <a class="cite" href="#majhi2026null" data-cite="majhi2026null">(Majhi &amp; Bagchi, 2026)</a>. <span data-fill="regime-inside"></span> of the <span data-fill="regime-priors"></span> networks trained for the test passed: none of their samples is a near-duplicate of a training example.</p>
+      </div>
+    </details>
+
+    <details class="section" id="result">
+      <summary><h2 class="section-title">The result</h2><span class="section-sub">Ranking passes, magnitude fails</span></summary>
+      <div class="section-body">
+        <p class="lede">The surrogate orders the suspects almost exactly as the network does. It does not get the size right when the prior links the fields only weakly.</p>
+        <section class="demo wide" id="result-chart" aria-labelledby="rc-title">
+          <h4 id="rc-title">Magnitude error at the eight confirmatory settings</h4>
+          <div class="chart-block"><div data-role="magnitude"></div></div>
+          <ul class="chart-legend"><li class="legend-weak">weak prior dependence (s = 0.25)</li><li class="legend-strong">strong prior dependence (s = 0.75)</li></ul>
+          <p class="demo-status">Each bar is one setting: operator coupling κ and whether the data are informative or weak. The rule required every bar below the dashed line.</p>
+          <p class="demo-readout" data-role="verdict"></p>
+        </section>
+        <p>At the four settings with weak prior dependence the surrogate overstates the total dependence by <span data-fill="mag-weak"></span>; at the four with strong dependence the error is <span data-fill="mag-strong"></span>, inside the tolerance. Where it fails, the network leaves <em>less</em> dependence in the posterior than the surrogate predicts.</p>
+        <div class="callout">
+          <p><strong>Verdict.</strong> By the rule fixed in advance, H1 is <strong>refuted</strong>. The Gaussian surrogate is a good guide to which suspect weighs more, but not to how much dependence the network leaves in the answer when the dependence between the fields is weak.</p>
+        </div>
+        <p>A negative result is still a result. The pre-registration anticipated it: if the hypothesis failed, the map of where it fails would be the contribution. And the test had controls that rule out the easy explanations: the networks were not copying, and the samplers agreed on the settings that were used.</p>
+      </div>
+    </details>
+
+    <details class="section" id="why">
+      <summary><h2 class="section-title">Why the surrogate misses</h2><span class="section-sub">Training longer makes it worse</span></summary>
+      <div class="section-body">
+        <p class="lede">Looking inside the networks themselves, before any data enter: a trained network carries less dependence between the fields than its own training examples had.</p>
+        <p>Measured as mutual information against draws from each network's own Gaussian surrogate, the deficit is <span data-fill="loss-weak"></span> with weak prior dependence and <span data-fill="loss-strong"></span> with strong dependence.</p>
+        <p>The first suspicion was under-training: perhaps the network had not yet learned the link. To test it, a follow-up was registered before it ran: sixteen networks trained eight times longer, to 160 000 steps, measuring the deficit along the way.</p>
+        <section class="demo wide" id="f1-chart" aria-labelledby="f1-title">
+          <h4 id="f1-title">Dependence lost by the network along training</h4>
+          <div class="chart-block"><div data-role="curves"></div></div>
+          <ul class="chart-legend" data-role="legend"></ul>
+          <p class="demo-status">Mean of four networks per line, with the range of the four shaded. Orange: weak prior dependence; blue: strong. Solid: 4096 training examples; dashed: 1024.</p>
+        </section>
+        <p>The answer was the opposite of the suspicion. In three of the four settings the deficit grew with training in all four networks. In the fourth it was already high from the first checkpoint and stayed flat. Under-training explains none of them, and no checkpoint copies its training set.</p>
+        <div class="callout">
+          <p><strong>In one sentence.</strong> The network learns the overall Gaussian shape of its examples early, including the link between the fields, and loses part of that link as training continues. This is the pattern described for single-field diffusion models, which follow the Gaussian structure only transiently during training <a class="cite" href="#li2024hidden" data-cite="li2024hidden">(Li et al., 2024)</a> and generalize long before they memorize <a class="cite" href="#bonnaire2025memorize" data-cite="bonnaire2025memorize">(Bonnaire et al., 2025)</a>; here it shows up as lost dependence between fields. It weighs more when the dependence is weak, because a loss of similar size is a larger fraction of a small total.</p>
+        </div>
+        <p>Training time is therefore not a neutral technical detail: it decides how much of the real dependence between the fields reaches the answer.</p>
+      </div>
+    </details>
+
+    <details class="section" id="takeaways">
+      <summary><h2 class="section-title">What stays</h2><span class="section-sub">And what is not known yet</span></summary>
+      <div class="section-body">
+        <div class="cards">
+          <div class="card"><h3>A method</h3><p>Split the dependence between fields into the measurement's share and the prior's share, exactly in the linear-Gaussian case.</p></div>
+          <div class="card"><h3>A warning</h3><p>The final map alone can mislead about where the dependence came from; a signed measure is needed.</p></div>
+          <div class="card"><h3>A finding</h3><p>Diffusion networks used as priors lose part of the dependence between fields as they train, enough for the Gaussian surrogate to miss the size.</p></div>
+        </div>
+        <h3>Limits</h3>
+        <p>Everything here is on one artificial problem with smooth Gaussian fields and a linear measurement (each datum is a weighted sum of the fields). Fields with sharp boundaries, nonlinear physics such as elastic wave propagation, and real seismic data are left to the next chapters of the thesis. Classical tools measure the operator's coupling locally, from the Hessian <a class="cite" href="#pan2018interparameter" data-cite="pan2018interparameter">(Pan et al., 2018)</a>; comparing them with the operator share is also future work.</p>
+        <p class="note">Next: Study II measures, under controlled conditions, how the dependence between fields and the network's tendency to copy its examples depend on the number of examples and on training time.</p>
+      </div>
+    </details>
+
+    <details class="section" id="references">
+      <summary><h2 class="section-title">References</h2><span class="section-sub">Every source cited on this page</span></summary>
+      <div class="section-body">
+        <p class="note">Generated from the thesis bibliography by <code>scripts/build_page.py</code>. Entries marked † have bibliographic fields not yet checked against the publisher record.</p>
+        <!-- references:start -->
+        <ol class="bibliography">
+          <li id="bonnaire2025memorize">
+            Bonnaire, T., Urfin, R., Biroli, G., Mézard, M. (2025). Why diffusion models don&#x27;t memorize: The role of implicit dynamical regularization in training. <em>Advances in Neural Information Processing Systems (NeurIPS)</em>.
+            <span class="cited-on">Cited in: <a href="#why">Why the surrogate misses</a></span>
+          </li>
+          <li id="kelvinius2025ddsmc">
+            Ekström Kelvinius, F., Zhao, Z., Lindsten, F. (2025). Solving linear-Gaussian Bayesian inverse problems with decoupled diffusion sequential Monte Carlo. <em>Proceedings of the 42nd International Conference on Machine Learning (ICML)</em> 267, pp. 15148–15181.
+            <span class="cited-on">Cited in: <a href="#sampling">Checking the instrument</a></span>
+          </li>
+          <li id="hagar2023posterior">
+            Hagar, L., Stevens, N. T. (2023). Posterior Ramifications of Prior Dependence Structures. <em>arXiv preprint arXiv:2312.06437</em>. <a href="https://arxiv.org/abs/2312.06437">arXiv:2312.06437</a> <span class="unverified" title="fields not yet checked against the publisher record">†</span>
+            <span class="cited-on">Cited in: <a href="#exact">The exact case</a></span>
+          </li>
+          <li id="herin2022pme">
+            Herin, M., Il Idrissi, M., Chabridon, V., Iooss, B. (2022). Proportional marginal effects for global sensitivity analysis. <em>arXiv preprint arXiv:2210.13065</em>. <a href="https://arxiv.org/abs/2210.13065">arXiv:2210.13065</a> <span class="unverified" title="fields not yet checked against the publisher record">†</span>
+            <span class="cited-on">Cited in: <a href="#sources">Three suspects</a></span>
+          </li>
+          <li id="li2024hidden">
+            Li, X., Dai, Y., Qu, Q. (2024). Understanding generalizability of diffusion models requires rethinking the hidden Gaussian structure. <em>Advances in Neural Information Processing Systems</em> 37, pp. 57499–57538. <a href="https://doi.org/10.52202/079017-1833">doi:10.52202/079017-1833</a>
+            <span class="cited-on">Cited in: <a href="#hypothesis">A shortcut, and its test</a>, <a href="#why">Why the surrogate misses</a></span>
+          </li>
+          <li id="majhi2026null">
+            Majhi, S., Bagchi, P. (2026). The Null Is the Hard Part: Exact Tests for Memorization in Generative Models. <em>arXiv preprint arXiv:2610.00251</em>. <a href="https://arxiv.org/abs/2610.00251">arXiv:2610.00251</a> <span class="unverified" title="fields not yet checked against the publisher record">†</span>
+            <span class="cited-on">Cited in: <a href="#hypothesis">A shortcut, and its test</a></span>
+          </li>
+          <li id="operto2013">
+            Operto, S., Gholami, Y., Prieux, V., Ribodetti, A., Brossier, R., Métivier, L., Virieux, J. (2013). A guided tour of multiparameter full-waveform inversion with multicomponent data: From theory to practice. <em>The Leading Edge</em> 32(9), 1040–1054. <a href="https://doi.org/10.1190/tle32091040.1">doi:10.1190/tle32091040.1</a>
+            <span class="cited-on">Cited in: <a href="#problem">Two linked fields</a></span>
+          </li>
+          <li id="owen2014shapley">
+            Owen, A. B. (2014). Sobol&#x27; indices and Shapley value. <em>SIAM/ASA Journal on Uncertainty Quantification</em> 2(1), 245–251. <a href="https://doi.org/10.1137/130936233">doi:10.1137/130936233</a>
+            <span class="cited-on">Cited in: <a href="#sources">Three suspects</a></span>
+          </li>
+          <li id="pan2018interparameter">
+            Pan, W., Geng, Y., Innanen, K. A. (2018). Interparameter trade-off quantification and reduction in isotropic-elastic full-waveform inversion: synthetic experiments and Hussar land data set application. <em>Geophysical Journal International</em> 213(2), 1305–1333. <a href="https://doi.org/10.1093/gji/ggy037">doi:10.1093/gji/ggy037</a>
+            <span class="cited-on">Cited in: <a href="#takeaways">What stays</a></span>
+          </li>
+          <li id="shapley1953value">
+            Shapley, L. S. (1953). A value for n-person games. <em>Contributions to the Theory of Games, Volume II</em> pp. 307–317. <span class="unverified" title="fields not yet checked against the publisher record">†</span>
+            <span class="cited-on">Cited in: <a href="#sources">Three suspects</a></span>
+          </li>
+          <li id="siahkoohi2026memorization">
+            Siahkoohi, A., Sabeddu, D. (2026). On the role of memorization in learned priors for geophysical inverse problems. <em>arXiv preprint arXiv:2603.19629</em>. <a href="https://arxiv.org/abs/2603.19629">arXiv:2603.19629</a>
+            <span class="cited-on">Cited in: <a href="#hypothesis">A shortcut, and its test</a></span>
+          </li>
+          <li id="wu2023twisted">
+            Wu, L., Trippe, B. L., Naesseth, C. A., Blei, D. M., Cunningham, J. P. (2023). Practical and Asymptotically Exact Conditional Sampling in Diffusion Models. <em>Advances in Neural Information Processing Systems (NeurIPS)</em>.
+            <span class="cited-on">Cited in: <a href="#sampling">Checking the instrument</a></span>
+          </li>
+        </ol>
+        <!-- references:end -->
+      </div>
+    </details>
+  </main>
+  <footer class="site-footer">
+    <p>Built by Thiago Barbieri as part of ongoing PhD research in AI at the University of São Paulo (USP). Numbers come from the study's registered results, imported by script. <a href="https://github.com/barbieriht">GitHub</a><br>Developed with the assistance of <a href="https://claude.com/claude-code">Claude Code</a>.</p>
+  </footer>
+  <script src="assets/vendor/katex/katex.min.js" defer></script>
+  <script src="assets/vendor/katex/auto-render.min.js" defer></script>
+  <script src="assets/js/math.js" defer></script>
+  <script src="assets/js/i18n.js" defer></script>
+  <script src="assets/js/sections.js" defer></script>
+  <script src="assets/js/linalg.js" defer></script>
+  <script src="assets/js/testbed.js" defer></script>
+  <script src="assets/js/attribution.js" defer></script>
+  <script src="assets/js/random.js" defer></script>
+  <script src="assets/js/colormap.js" defer></script>
+  <script src="assets/js/svg.js" defer></script>
+  <script src="assets/js/prior-demo.js" defer></script>
+  <script src="assets/js/attribution-demo.js" defer></script>
+  <script src="assets/js/sampling-demo.js" defer></script>
+  <script src="assets/data/study1-results.js" defer></script>
+  <script src="assets/js/results.js" defer></script>
+</body>
+</html>

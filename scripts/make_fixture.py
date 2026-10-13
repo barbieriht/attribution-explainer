@@ -3,7 +3,7 @@
     python scripts/make_fixture.py /path/to/FWI > tests/fixtures/attribution.json
 
 Needs the thesis environment (`fwi_common` importable from the FWI repository). The JS
-tests (tests/attribution.test.js, tests/testbed.test.js) compare against this file, so
+tests (tests/attribution.test.js) compare against this file, so
 the browser computes exactly what the paper's exact grid computes.
 """
 import json

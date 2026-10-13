@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Attribution Explainer</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2711%27 cy=%2716%27 r=%278%27 fill=%27none%27 stroke=%27%231f5fa8%27 stroke-width=%273%27/%3E%3Ccircle cx=%2721%27 cy=%2716%27 r=%278%27 fill=%27none%27 stroke=%27%23b8440f%27 stroke-width=%273%27/%3E%3C/svg%3E">
+  <meta name="description" content="Explicação interativa do Estudo I: de onde vem a dependência entre campos estimados juntos, do operador ou do prior, calculada de forma exata no seu navegador.">
+  <meta name="author" content="Thiago Barbieri">
+  <link rel="alternate" hreflang="en" href="index.html">
+  <link rel="alternate" hreflang="pt-BR" href="index.pt.html">
+  <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/explainer.css">
+  <script src="assets/js/theme.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Pular para o conteúdo</a>
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Site">
+      <a class="brand" href="#top">Attribution Explainer</a>
+      <div class="lang-switch" role="group" aria-label="Idioma" data-lang-switch>
+        <a href="index.html" hreflang="en" lang="en">EN</a>
+        <a href="index.pt.html" hreflang="pt-BR" lang="pt-BR" aria-current="true">PT</a>
+      </div>
+      <button type="button" class="theme-toggle" data-theme-toggle data-label-dark="Mudar para o tema escuro" data-label-light="Mudar para o tema claro"></button>
+    </nav>
+  </header>
+  <main id="content">
+    <div id="top"></div>
+    <h1>De onde vem o crosstalk?</h1>
+    <p class="lede">Quando vários mapas do subsolo são estimados juntos, eles saem amarrados uns aos outros. O Estudo I deste doutorado pergunta quem fez essa amarração: a física da medição ou o conhecimento prévio dado à inversão. E mede a resposta. Todos os números das demonstrações abaixo são calculados de forma exata no seu navegador. Abra qualquer seção para ler.</p>
+    <div class="section-tools">
+      <button type="button" data-sections="expand">Abrir todas</button>
+      <button type="button" data-sections="collapse">Fechar todas</button>
+    </div>
+
+    <details class="section" id="problem">
+      <summary><h2 class="section-title">Dois campos ligados</h2><span class="section-sub">O que é crosstalk</span></summary>
+      <div class="section-body">
+        <p class="lede">Não dá para cavar debaixo de uma região para ver as rochas. Mandamos ondas para dentro da Terra, gravamos o eco na superfície e deixamos um computador reconstruir os mapas das propriedades das rochas que explicariam esse eco.</p>
+        <p>Na prática, queremos vários mapas de uma vez: por exemplo, a velocidade das ondas de compressão e a velocidade das ondas de cisalhamento. Aqui vamos chamá-los simplesmente de <strong>campo 1</strong> e <strong>campo 2</strong>.</p>
+        <p>Os dados nunca contam a história inteira, então a resposta honesta não é um mapa só, e sim uma coleção de mapas possíveis, todos compatíveis com o que foi medido. Os estatísticos chamam essa coleção de <strong>distribuição posterior</strong>. Olhando para ela, aparece um padrão: quando um mapa possível tem o campo 1 mais alto em certo ponto, o campo 2 tende a estar mais alto (ou mais baixo) no mesmo ponto. Os campos estão <strong>ligados</strong>.</p>
+        <p>Os geofísicos chamam essa ligação de <strong>crosstalk</strong>, ou interferência entre parâmetros: parte do que aparece num mapa pode ser, na verdade, um reflexo do outro <a class="cite" href="#operto2013" data-cite="operto2013">(Operto et al., 2013)</a>. Isso importa, porque decisões como onde perfurar ou como interpretar uma rocha são tomadas lendo esses mapas.</p>
+
+        <h3>Ligações também podem ser postas de propósito</h3>
+        <p>Antes de qualquer dado chegar, a inversão já carrega uma crença sobre como os campos são: o <strong>prior</strong>. No problema de teste deste estudo, o prior monta cada campo a partir de alguns padrões suaves, e uma fração \(s\) desses padrões é compartilhada pelos dois campos. Com \(s = 0\) os campos são independentes; com \(s = 1\) eles andam juntos. Sorteie alguns pares e veja a nuvem de pontos se inclinar conforme \(s\) cresce.</p>
+
+        <section class="demo wide" id="prior-demo" aria-labelledby="pd-title">
+          <h4 id="pd-title">Experimente: sorteie dois campos do prior</h4>
+          <div class="demo-panels three">
+            <figure>
+              <canvas class="field" data-role="field1" role="img" aria-label="Campo 1, 16 por 16 pontos"></canvas>
+              <figcaption>Campo 1 (16 × 16 pontos)</figcaption>
+            </figure>
+            <figure>
+              <canvas class="field" data-role="field2" role="img" aria-label="Campo 2, 16 por 16 pontos"></canvas>
+              <figcaption>Campo 2, mesma escala de cores</figcaption>
+            </figure>
+            <figure>
+              <div data-role="scatter"></div>
+              <figcaption>Cada ponto é um dos 256 pontos do mapa: campo 1 na horizontal, campo 2 na vertical.</figcaption>
+            </figure>
+          </div>
+          <div class="legend-diverging" aria-hidden="true"><span>baixo</span><span class="legend-bar-diverging"></span><span>alto</span></div>
+          <div class="controls">
+            <label class="control"><span class="label">Fração compartilhada s = <output data-role="shared-value">0,5</output></span>
+              <input type="range" data-role="shared" min="0" max="1" step="0.125" value="0.5"></label>
+            <div class="button-row"><button type="button" data-role="redraw">Sortear outro par</button></div>
+          </div>
+          <p class="demo-readout" data-role="readout" aria-live="polite"></p>
+        </section>
+        <p>A ligação que aparece num resultado de inversão pode, portanto, ter sido posta pelo prior, pela medição, ou pelos dois. O resto desta página trata de separá-los.</p>
+      </div>
+    </details>
+
+    <details class="section" id="sources">
+      <summary><h2 class="section-title">Três suspeitos</h2><span class="section-sub">Operador, prior, rede</span></summary>
+      <div class="section-body">
+        <p class="lede">A ligação entre os campos na posterior pode vir de três lugares. No mapa final os três ficam misturados, e nada mostra quem fez o quê.</p>
+        <div class="cards">
+          <div class="card"><h3>O operador</h3><p>A física da medição. Se cada eco gravado depende dos dois campos ao mesmo tempo, os dados não conseguem separá-los: só enxergam uma mistura.</p></div>
+          <div class="card"><h3>O prior</h3><p>O que se acreditava antes de medir, aprendido a partir de exemplos. Se nos exemplos os dois campos andavam juntos, essa crença entra na resposta.</p></div>
+          <div class="card"><h3>A rede</h3><p>Hoje o prior costuma ser uma rede neural treinada (um modelo de difusão). Ela pode acrescentar ou tirar ligações que os exemplos não tinham.</p></div>
+        </div>
+
+        <h3>Desligar cada suspeito</h3>
+        <p>Para saber se um suspeito importa, a gente o desliga e vê o que muda. Cada desligamento é um experimento que dá para fazer de verdade:</p>
+        <ul>
+          <li><strong>Operador desligado:</strong> medir cada campo separadamente, com o mesmo ruído. A informação sobre cada campo continua lá; só a mistura some.</li>
+          <li><strong>Prior desligado:</strong> manter as estatísticas de cada campo, mas tornar os dois independentes. Cada campo, sozinho, continua igual; só a ligação entre eles some.</li>
+        </ul>
+        <p>Dois interruptores dão quatro combinações. Em cada uma, medimos o quanto os campos estão ligados na posterior, com uma medida de dependência \(D\):</p>
+        <table class="metrics coalitions">
+          <thead><tr><th></th><th>operador desligado</th><th>operador ligado</th></tr></thead>
+          <tbody>
+            <tr><th>prior desligado</th><td>\(D(\varnothing)\): o que sobra sem nenhuma fonte</td><td>\(D(O)\): só a física</td></tr>
+            <tr><th>prior ligado</th><td>\(D(P)\): só o prior</td><td>\(D(OP)\): a situação real, a que o cientista vê</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Uma divisão justa: o valor de Shapley</h3>
+        <p>Falta dividir a mudança total, \(D(OP) - D(\varnothing)\), entre os suspeitos. Usamos o <strong>valor de Shapley</strong> <a class="cite" href="#shapley1953value" data-cite="shapley1953value">(Shapley, 1953)</a>, uma regra da teoria dos jogos para repartir crédito num trabalho em grupo: o crédito de cada participante é o quanto ele acrescenta ao entrar no grupo, na média de todas as ordens possíveis de chegada. Com dois participantes,</p>
+        \[ \varphi_O = \tfrac12\big[(D(O) - D(\varnothing)) + (D(OP) - D(P))\big], \qquad \varphi_P = \tfrac12\big[(D(P) - D(\varnothing)) + (D(OP) - D(O))\big], \]
+        <p>e as parcelas sempre somam o total: \(\varphi_O + \varphi_P = D(OP) - D(\varnothing)\). O valor de Shapley já reparte variância entre entradas na análise de sensibilidade <a class="cite" href="#owen2014shapley" data-cite="owen2014shapley">(Owen, 2014)</a>, inclusive quando as entradas são dependentes <a class="cite" href="#herin2022pme" data-cite="herin2022pme">(Herin et al., 2022)</a>. Aqui os participantes não são entradas sorteadas de uma distribuição, e sim interruptores no próprio problema.</p>
+        <p class="note">Uma parcela pode ser negativa: um suspeito pode <em>tirar</em> dependência. Por isso o estudo sempre reporta uma medida de dependência com sinal.</p>
+      </div>
+    </details>
+
+    <details class="section" id="exact">
+      <summary><h2 class="section-title">O caso exato</h2><span class="section-sub">Ligue e desligue as fontes</span></summary>
+      <div class="section-body">
+        <p class="lede">Para testar o método, precisamos de um problema cuja resposta certa seja conhecida. O problema de teste é artificial e totalmente controlado, e a posterior dele tem fórmula fechada.</p>
+
+        <h3>O problema de teste</h3>
+        <ul>
+          <li><strong>Campos:</strong> dois mapas de 16 × 16 pontos, 512 números ao todo, sorteados do prior gaussiano da primeira seção, com fração compartilhada \(s\).</li>
+          <li><strong>Medição:</strong> cada campo é borrado e amostrado a cada tantos pontos (o <em>passo</em>; passo maior significa menos dados). Os dados dos dois campos são misturados com um acoplamento \(\kappa\): com \(\kappa = 0\) cada dado vê um campo só; conforme \(\kappa\) cresce, cada dado vê mais dos dois.</li>
+          <li><strong>Ruído:</strong> gaussiano, com a variância que você escolher. Ruído pequeno e passo pequeno significam dados informativos.</li>
+        </ul>
+        <p>Com um prior gaussiano de covariância \(C_p\) e uma medição linear \(G\) com variância de ruído \(\sigma^2\), a posterior também é gaussiana, com covariância</p>
+        \[ C = C_p - C_p G^\top \big(G C_p G^\top + \sigma^2 I\big)^{-1} G C_p . \]
+        <p>De \(C\) lemos a dependência entre os campos. A medida principal é a <strong>correlação pontual média com sinal</strong>: a correlação \(\rho(x)\) entre o campo 1 e o campo 2 em cada ponto \(x\), na média dos 256 pontos. Há duas outras: a mesma média sem o sinal, e a <strong>informação mútua</strong> entre os campos inteiros.</p>
+
+        <section class="demo wide" id="attribution-demo" aria-labelledby="ad-title">
+          <h4 id="ad-title">Experimente: ligue e desligue cada fonte</h4>
+          <div class="scenario-row">
+            <button type="button" data-preset="strong">Dados informativos</button>
+            <button type="button" data-preset="weak">Dados fracos</button>
+            <button type="button" data-preset="tug">Cabo de guerra</button>
+            <button type="button" data-preset="confirmatory">Um ponto confirmatório</button>
+          </div>
+          <div class="cell-grid">
+            <figure><canvas class="field" data-role="cell-none" role="img" aria-label="Mapa de correlação pontual, nenhuma fonte"></canvas><figcaption><strong>Nenhuma fonte</strong><br><span data-role="value-none"></span></figcaption></figure>
+            <figure><canvas class="field" data-role="cell-O" role="img" aria-label="Mapa de correlação pontual, só o operador"></canvas><figcaption><strong>Só o operador</strong><br><span data-role="value-O"></span></figcaption></figure>
+            <figure><canvas class="field" data-role="cell-P" role="img" aria-label="Mapa de correlação pontual, só o prior"></canvas><figcaption><strong>Só o prior</strong><br><span data-role="value-P"></span></figcaption></figure>
+            <figure><canvas class="field" data-role="cell-OP" role="img" aria-label="Mapa de correlação pontual, as duas fontes"></canvas><figcaption><strong>As duas (o que se vê)</strong><br><span data-role="value-OP"></span></figcaption></figure>
+          </div>
+          <div class="legend-diverging" aria-hidden="true"><span>ρ = −1</span><span class="legend-bar-diverging"></span><span>ρ = +1</span></div>
+          <div class="controls">
+            <label class="control"><span class="label">Acoplamento do operador κ = <output data-role="kappa-value">0,5</output></span>
+              <input type="range" data-role="kappa" min="0" max="0.95" step="0.05" value="0.5"></label>
+            <label class="control"><span class="label">Fração compartilhada do prior s = <output data-role="shared-value">0,75</output></span>
+              <input type="range" data-role="shared" min="0" max="1" step="0.125" value="0.75"></label>
+            <label class="control"><span class="label">Variância do ruído</span>
+              <select data-role="noise">
+                <option value="0.001">0,001</option>
+                <option value="0.01" selected>0,01</option>
+                <option value="0.1">0,1</option>
+                <option value="1">1</option>
+              </select></label>
+            <label class="control"><span class="label">Passo</span>
+              <select data-role="stride">
+                <option value="2">2 (64 dados por campo)</option>
+                <option value="4" selected>4 (16 dados por campo)</option>
+                <option value="8">8 (4 dados por campo)</option>
+              </select></label>
+            <fieldset>
+              <legend>Medida de dependência</legend>
+              <label><input type="radio" name="attr-functional" value="signed" checked> correlação com sinal</label>
+              <label><input type="radio" name="attr-functional" value="unsigned"> sem sinal</label>
+              <label><input type="radio" name="attr-functional" value="mi"> informação mútua</label>
+            </fieldset>
+          </div>
+          <div class="chart-block"><div data-role="shares"></div></div>
+          <p class="demo-readout" data-role="readout" aria-live="polite"></p>
+          <p class="demo-status" data-role="status" aria-live="polite"></p>
+        </section>
+
+        <h3>O que o caso exato mostra</h3>
+        <p><strong>Quanto do prior sobrevive depende dos dados.</strong> Experimente <em>Dados informativos</em> e depois <em>Dados fracos</em>. O prior é o mesmo e liga os campos fortemente, e o operador não os mistura. Mesmo assim, quase nada da ligação do prior sobrevive quando os dados são informativos, e quase toda ela quando dizem pouco. Os dados apagam a crença prévia na medida em que conseguem falar por si; com muitos dados, a dependência do prior em geral não é retida pela posterior <a class="cite" href="#hagar2023posterior" data-cite="hagar2023posterior">(Hagar &amp; Stevens, 2023)</a>.</p>
+        <p><strong>Operador e prior podem puxar em sentidos opostos.</strong> Neste problema, a medição tende a criar dependência negativa (um campo sobe, o outro desce) e o prior, dependência positiva. Na grade de situações do estudo, as duas parcelas tiveram sinais opostos em <span data-fill="grid-opposing"></span> das <span data-fill="grid-coupled"></span> situações em que as duas fontes estavam presentes. Experimente <em>Cabo de guerra</em>: com um prior que amarra os campos quase perfeitamente, o mapa final ainda mostra uma ligação levemente negativa.</p>
+        <div class="callout">
+          <p><strong>Em uma frase.</strong> Olhar só o mapa final engana: ele pode mostrar uma ligação negativa que veio quase toda da medição, escondendo uma crença prévia fortemente positiva. Uma medida sem sinal confunde "duas forças se cancelando" com "o prior tirando dependência": com a informação mútua, a parcela do prior saiu negativa em <span data-fill="grid-mi-negative"></span> das <span data-fill="grid-mi-cells"></span> situações da grade com prior dependente. Troque a medida na demonstração para ver.</p>
+        </div>
+      </div>
+    </details>
+
+    <details class="section" id="sampling">
+      <summary><h2 class="section-title">Conferindo o instrumento</h2><span class="section-sub">Um amostrador torto cria as próprias ligações</span></summary>
+      <div class="section-body">
+        <p class="lede">Quando o prior é uma rede neural, não existe mais fórmula para a posterior. Só dá para sortear mapas possíveis com um programa chamado <strong>amostrador</strong>, e estimar a dependência a partir desses sorteios.</p>
+        <p>Um amostrador um pouco torto pode criar ou tirar dependência por conta própria, como um termômetro que marca dois graus a mais. E mais sorteios não ajudam: só deixam o valor errado mais preciso. A demonstração abaixo usa uma posterior cuja resposta exata é conhecida. O controle de <em>viés</em> faz o amostrador encolher a ligação entre os campos por uma fração \(b\).</p>
+
+        <section class="demo wide" id="sampling-demo" aria-labelledby="sd-title">
+          <h4 id="sd-title">Experimente: estime a dependência a partir de amostras</h4>
+          <div class="chart-block"><div data-role="chart"></div></div>
+          <div class="controls">
+            <label class="control"><span class="label">Amostras por estimativa</span>
+              <select data-role="samples">
+                <option value="16">16</option>
+                <option value="64" selected>64</option>
+                <option value="256">256</option>
+              </select></label>
+            <label class="control"><span class="label">Viés do amostrador b = <output data-role="bias-value">0</output></span>
+              <input type="range" data-role="bias" min="0" max="0.3" step="0.05" value="0"></label>
+            <div class="button-row"><button type="button" data-role="redraw">Sortear de novo</button></div>
+          </div>
+          <p class="demo-readout" data-role="readout" aria-live="polite"></p>
+          <p class="demo-status">Posterior de um ponto confirmatório (κ = 0,25, s = 0,75, variância do ruído 0,1, passo 4), amostrada de forma exata; o amostrador torto sorteia da mesma posterior com a covariância entre os campos multiplicada por 1 − b.</p>
+        </section>
+
+        <h3>Como o amostrador de verdade foi conferido</h3>
+        <p>O amostrador do estudo é um método de Monte Carlo sequencial com <em>twist</em> <a class="cite" href="#wu2023twisted" data-cite="wu2023twisted">(Wu et al., 2023)</a>. Antes de qualquer resultado, ele tinha que reproduzir respostas exatas em problemas como o de cima, em 512 dimensões, dentro de margens fixadas de antemão. Falhou duas vezes, foi diagnosticado e corrigido, e passou numa terceira semente, nova, com o pior caso em 0,92 da margem permitida.</p>
+        <p>Depois foi comparado com um amostrador construído de outro jeito, o DDSMC <a class="cite" href="#kelvinius2025ddsmc" data-cite="kelvinius2025ddsmc">(Ekström Kelvinius et al., 2025)</a>, e com uma ablação do seu próprio <em>twist</em>, numa rede treinada em 128 dimensões: as 45 comparações, em cinco redes treinadas de forma independente, concordaram, julgadas contra a diferença esperada entre dois amostradores exatos.</p>
+      </div>
+    </details>
+
+    <details class="section" id="hypothesis">
+      <summary><h2 class="section-title">Um atalho, e o teste dele</h2><span class="section-sub">Hipótese H1, pré-registrada</span></summary>
+      <div class="section-body">
+        <p class="lede">Treinar redes e sortear milhares de mapas é caro. Existe um atalho: trocar a rede por uma <strong>substituta gaussiana</strong>, que guarda só a média e as correlações dos exemplos de treino. Para a substituta, a atribuição sai exata e de graça, pelas fórmulas das seções anteriores.</p>
+        <p>Trabalhos anteriores sugerem que redes de difusão, no regime em que generalizam, removem ruído quase como essa substituta gaussiana, pelo menos numa faixa de níveis de ruído e, para redes grandes, de forma passageira durante o treino <a class="cite" href="#li2024hidden" data-cite="li2024hidden">(Li et al., 2024)</a>. Daí a hipótese do estudo:</p>
+        <div class="callout">
+          <p><strong>Hipótese H1.</strong> A atribuição calculada com a substituta gaussiana prevê a atribuição obtida com a rede treinada: a mesma ordem das parcelas entre as situações, e a mesma dependência total dentro de uma tolerância fixada.</p>
+        </div>
+
+        <h3>Regras escritas antes dos dados</h3>
+        <p>Para não ajustar o critério depois de ver o resultado, o teste foi <strong>pré-registrado</strong>: as regras de aprovação, as margens e até o programa de análise foram escritos e guardados antes dos experimentos rodarem. Quando uma regra precisou mudar, a mudança foi registrada como emenda datada, sempre antes de existirem os dados que ela julgaria. Duas exigências tinham que valer juntas, em oito situações (acoplamento do operador \(\kappa \in \{0{,}25;\ 0{,}75\}\), dependência do prior \(s \in \{0{,}25;\ 0{,}75\}\), dados informativos ou fracos), com quatro redes treinadas de forma independente por situação:</p>
+        <ul>
+          <li><strong>Ordem:</strong> nas oito situações, a substituta tem que ordenar cada parcela como a rede ordena. A concordância é medida pelo \(\tau\) de Kendall, em que 1 é concordância perfeita; os limiares foram calculados de antemão a partir de quanto \(\tau\) uma substituta exatamente correta perderia para o ruído de estimação e a variação do treino.</li>
+          <li><strong>Tamanho:</strong> a dependência total prevista não pode errar mais que 4,5% em nenhuma das oito situações.</li>
+        </ul>
+
+        <h3>A rede está copiando os exemplos?</h3>
+        <p>Uma rede que decora o conjunto de treino transforma a posterior numa consulta aos exemplos de treino <a class="cite" href="#siahkoohi2026memorization" data-cite="siahkoohi2026memorization">(Siahkoohi &amp; Sabeddu, 2026)</a>, e a substituta deixaria de valer. Por isso cada rede passou por um teste exato de cópia, que conta quase-duplicatas de exemplos de treino contra as de exemplos guardados fora do treino <a class="cite" href="#majhi2026null" data-cite="majhi2026null">(Majhi &amp; Bagchi, 2026)</a>. <span data-fill="regime-inside"></span> das <span data-fill="regime-priors"></span> redes treinadas para o teste passaram: nenhuma das suas amostras é quase-duplicata de um exemplo de treino.</p>
+      </div>
+    </details>
+
+    <details class="section" id="result">
+      <summary><h2 class="section-title">O resultado</h2><span class="section-sub">A ordem passa, o tamanho não</span></summary>
+      <div class="section-body">
+        <p class="lede">A substituta ordena os suspeitos quase exatamente como a rede. Ela não acerta o tamanho quando o prior liga os campos só de leve.</p>
+        <section class="demo wide" id="result-chart" aria-labelledby="rc-title">
+          <h4 id="rc-title">Erro de tamanho nas oito situações confirmatórias</h4>
+          <div class="chart-block"><div data-role="magnitude"></div></div>
+          <ul class="chart-legend"><li class="legend-weak">dependência fraca no prior (s = 0,25)</li><li class="legend-strong">dependência forte no prior (s = 0,75)</li></ul>
+          <p class="demo-status">Cada barra é uma situação: acoplamento do operador κ e se os dados são informativos ou fracos. A regra exigia todas as barras abaixo da linha tracejada.</p>
+          <p class="demo-readout" data-role="verdict"></p>
+        </section>
+        <p>Nas quatro situações com dependência fraca no prior, a substituta exagera a dependência total em <span data-fill="mag-weak"></span>; nas quatro com dependência forte, o erro fica em <span data-fill="mag-strong"></span>, dentro da tolerância. Onde falha, a rede deixa <em>menos</em> dependência na posterior do que a substituta prevê.</p>
+        <div class="callout">
+          <p><strong>Veredito.</strong> Pela regra combinada de antemão, a H1 foi <strong>refutada</strong>. A substituta gaussiana é um bom guia para saber qual suspeito pesa mais, mas não para saber quanta dependência a rede deixa na resposta quando a dependência entre os campos é fraca.</p>
+        </div>
+        <p>Um resultado negativo também é resultado. O pré-registro previa isso: se a hipótese falhasse, o mapa de onde ela falha seria a contribuição. E o teste tinha controles que descartam as explicações fáceis: as redes não estavam copiando, e os amostradores concordavam nas situações usadas.</p>
+      </div>
+    </details>
+
+    <details class="section" id="why">
+      <summary><h2 class="section-title">Por que a substituta erra</h2><span class="section-sub">Treinar mais piora</span></summary>
+      <div class="section-body">
+        <p class="lede">Olhando dentro das próprias redes, antes de qualquer dado entrar: a rede treinada carrega menos dependência entre os campos do que os seus próprios exemplos de treino tinham.</p>
+        <p>Medido como informação mútua contra sorteios da substituta gaussiana de cada rede, o déficit é de <span data-fill="loss-weak"></span> com dependência fraca no prior e de <span data-fill="loss-strong"></span> com dependência forte.</p>
+        <p>A primeira suspeita foi falta de treino: talvez a rede ainda não tivesse aprendido a ligação. Para testar, registramos um acompanhamento antes de rodá-lo: dezesseis redes treinadas oito vezes mais, até 160 mil passos, medindo o déficit ao longo do caminho.</p>
+        <section class="demo wide" id="f1-chart" aria-labelledby="f1-title">
+          <h4 id="f1-title">Dependência perdida pela rede ao longo do treino</h4>
+          <div class="chart-block"><div data-role="curves"></div></div>
+          <ul class="chart-legend" data-role="legend"></ul>
+          <p class="demo-status">Média de quatro redes por linha, com a faixa das quatro sombreada. Laranja: dependência fraca no prior; azul: forte. Cheia: 4096 exemplos de treino; tracejada: 1024.</p>
+        </section>
+        <p>A resposta foi o contrário da suspeita. Em três das quatro configurações, o déficit cresceu com o treino nas quatro redes. Na quarta, ele já estava alto desde o primeiro ponto de controle e ficou parado. A falta de treino não explica nenhuma delas, e nenhum ponto de controle copia o seu conjunto de treino.</p>
+        <div class="callout">
+          <p><strong>Em uma frase.</strong> A rede aprende cedo a forma gaussiana geral dos exemplos, incluindo a ligação entre os campos, e perde parte dessa ligação conforme o treino continua. É o padrão descrito para modelos de difusão de um único campo, que seguem a estrutura gaussiana só de forma passageira durante o treino <a class="cite" href="#li2024hidden" data-cite="li2024hidden">(Li et al., 2024)</a> e generalizam muito antes de decorar <a class="cite" href="#bonnaire2025memorize" data-cite="bonnaire2025memorize">(Bonnaire et al., 2025)</a>; aqui ele aparece como dependência perdida entre campos. Pesa mais quando a dependência é fraca, porque uma perda de tamanho parecido vira uma fração maior de um total pequeno.</p>
+        </div>
+        <p>O tempo de treino, portanto, não é um detalhe técnico neutro: ele decide quanto da dependência real entre os campos chega até a resposta.</p>
+      </div>
+    </details>
+
+    <details class="section" id="takeaways">
+      <summary><h2 class="section-title">O que fica</h2><span class="section-sub">E o que ainda não sabemos</span></summary>
+      <div class="section-body">
+        <div class="cards">
+          <div class="card"><h3>Um método</h3><p>Dividir a dependência entre campos na parcela da medição e na parcela do prior, de forma exata no caso linear-gaussiano.</p></div>
+          <div class="card"><h3>Um alerta</h3><p>O mapa final sozinho pode enganar sobre de onde veio a dependência; é preciso uma medida com sinal.</p></div>
+          <div class="card"><h3>Uma descoberta</h3><p>Redes de difusão usadas como prior perdem parte da dependência entre campos à medida que treinam, a ponto de a substituta gaussiana errar o tamanho.</p></div>
+        </div>
+        <h3>Limites</h3>
+        <p>Tudo aqui foi feito num problema artificial, com campos gaussianos suaves e uma medição linear (cada dado é uma soma ponderada dos campos). Campos com bordas bruscas, física não linear como a propagação de ondas elásticas, e dados sísmicos reais ficam para os próximos capítulos da tese. As ferramentas clássicas medem o acoplamento do operador localmente, a partir da hessiana <a class="cite" href="#pan2018interparameter" data-cite="pan2018interparameter">(Pan et al., 2018)</a>; compará-las com a parcela do operador também é trabalho futuro.</p>
+        <p class="note">Próximo passo: o Estudo II mede, de forma controlada, como a dependência entre campos e a tendência da rede a copiar os exemplos dependem do número de exemplos e do tempo de treino.</p>
+      </div>
+    </details>
+
+    <details class="section" id="references">
+      <summary><h2 class="section-title">Referências</h2><span class="section-sub">Todas as fontes citadas nesta página</span></summary>
+      <div class="section-body">
+        <p class="note">Geradas a partir da bibliografia da tese por <code>scripts/build_page.py</code>. Entradas marcadas com † têm campos bibliográficos ainda não conferidos com o registro da editora.</p>
+        <!-- references:start -->
+        <ol class="bibliography">
+          <li id="bonnaire2025memorize">
+            Bonnaire, T., Urfin, R., Biroli, G., Mézard, M. (2025). Why diffusion models don&#x27;t memorize: The role of implicit dynamical regularization in training. <em>Advances in Neural Information Processing Systems (NeurIPS)</em>.
+            <span class="cited-on">Citado em: <a href="#why">Por que a substituta erra</a></span>
+          </li>
+          <li id="kelvinius2025ddsmc">
+            Ekström Kelvinius, F., Zhao, Z., Lindsten, F. (2025). Solving linear-Gaussian Bayesian inverse problems with decoupled diffusion sequential Monte Carlo. <em>Proceedings of the 42nd International Conference on Machine Learning (ICML)</em> 267, pp. 15148–15181.
+            <span class="cited-on">Citado em: <a href="#sampling">Conferindo o instrumento</a></span>
+          </li>
+          <li id="hagar2023posterior">
+            Hagar, L., Stevens, N. T. (2023). Posterior Ramifications of Prior Dependence Structures. <em>arXiv preprint arXiv:2312.06437</em>. <a href="https://arxiv.org/abs/2312.06437">arXiv:2312.06437</a> <span class="unverified" title="campos ainda não conferidos com o registro da editora">†</span>
+            <span class="cited-on">Citado em: <a href="#exact">O caso exato</a></span>
+          </li>
+          <li id="herin2022pme">
+            Herin, M., Il Idrissi, M., Chabridon, V., Iooss, B. (2022). Proportional marginal effects for global sensitivity analysis. <em>arXiv preprint arXiv:2210.13065</em>. <a href="https://arxiv.org/abs/2210.13065">arXiv:2210.13065</a> <span class="unverified" title="campos ainda não conferidos com o registro da editora">†</span>
+            <span class="cited-on">Citado em: <a href="#sources">Três suspeitos</a></span>
+          </li>
+          <li id="li2024hidden">
+            Li, X., Dai, Y., Qu, Q. (2024). Understanding generalizability of diffusion models requires rethinking the hidden Gaussian structure. <em>Advances in Neural Information Processing Systems</em> 37, pp. 57499–57538. <a href="https://doi.org/10.52202/079017-1833">doi:10.52202/079017-1833</a>
+            <span class="cited-on">Citado em: <a href="#hypothesis">Um atalho, e o teste dele</a>, <a href="#why">Por que a substituta erra</a></span>
+          </li>
+          <li id="majhi2026null">
+            Majhi, S., Bagchi, P. (2026). The Null Is the Hard Part: Exact Tests for Memorization in Generative Models. <em>arXiv preprint arXiv:2610.00251</em>. <a href="https://arxiv.org/abs/2610.00251">arXiv:2610.00251</a> <span class="unverified" title="campos ainda não conferidos com o registro da editora">†</span>
+            <span class="cited-on">Citado em: <a href="#hypothesis">Um atalho, e o teste dele</a></span>
+          </li>
+          <li id="operto2013">
+            Operto, S., Gholami, Y., Prieux, V., Ribodetti, A., Brossier, R., Métivier, L., Virieux, J. (2013). A guided tour of multiparameter full-waveform inversion with multicomponent data: From theory to practice. <em>The Leading Edge</em> 32(9), 1040–1054. <a href="https://doi.org/10.1190/tle32091040.1">doi:10.1190/tle32091040.1</a>
+            <span class="cited-on">Citado em: <a href="#problem">Dois campos ligados</a></span>
+          </li>
+          <li id="owen2014shapley">
+            Owen, A. B. (2014). Sobol&#x27; indices and Shapley value. <em>SIAM/ASA Journal on Uncertainty Quantification</em> 2(1), 245–251. <a href="https://doi.org/10.1137/130936233">doi:10.1137/130936233</a>
+            <span class="cited-on">Citado em: <a href="#sources">Três suspeitos</a></span>
+          </li>
+          <li id="pan2018interparameter">
+            Pan, W., Geng, Y., Innanen, K. A. (2018). Interparameter trade-off quantification and reduction in isotropic-elastic full-waveform inversion: synthetic experiments and Hussar land data set application. <em>Geophysical Journal International</em> 213(2), 1305–1333. <a href="https://doi.org/10.1093/gji/ggy037">doi:10.1093/gji/ggy037</a>
+            <span class="cited-on">Citado em: <a href="#takeaways">O que fica</a></span>
+          </li>
+          <li id="shapley1953value">
+            Shapley, L. S. (1953). A value for n-person games. <em>Contributions to the Theory of Games, Volume II</em> pp. 307–317. <span class="unverified" title="campos ainda não conferidos com o registro da editora">†</span>
+            <span class="cited-on">Citado em: <a href="#sources">Três suspeitos</a></span>
+          </li>
+          <li id="siahkoohi2026memorization">
+            Siahkoohi, A., Sabeddu, D. (2026). On the role of memorization in learned priors for geophysical inverse problems. <em>arXiv preprint arXiv:2603.19629</em>. <a href="https://arxiv.org/abs/2603.19629">arXiv:2603.19629</a>
+            <span class="cited-on">Citado em: <a href="#hypothesis">Um atalho, e o teste dele</a></span>
+          </li>
+          <li id="wu2023twisted">
+            Wu, L., Trippe, B. L., Naesseth, C. A., Blei, D. M., Cunningham, J. P. (2023). Practical and Asymptotically Exact Conditional Sampling in Diffusion Models. <em>Advances in Neural Information Processing Systems (NeurIPS)</em>.
+            <span class="cited-on">Citado em: <a href="#sampling">Conferindo o instrumento</a></span>
+          </li>
+        </ol>
+        <!-- references:end -->
+      </div>
+    </details>
+  </main>
+  <footer class="site-footer">
+    <p>Feito por Thiago Barbieri como parte de uma pesquisa de doutorado em IA na Universidade de São Paulo (USP). Os números vêm dos resultados registrados do estudo, importados por script. <a href="https://github.com/barbieriht">GitHub</a><br>Desenvolvido com a ajuda do <a href="https://claude.com/claude-code">Claude Code</a>.</p>
+  </footer>
+  <script src="assets/vendor/katex/katex.min.js" defer></script>
+  <script src="assets/vendor/katex/auto-render.min.js" defer></script>
+  <script src="assets/js/math.js" defer></script>
+  <script src="assets/js/i18n.js" defer></script>
+  <script src="assets/js/sections.js" defer></script>
+  <script src="assets/js/linalg.js" defer></script>
+  <script src="assets/js/testbed.js" defer></script>
+  <script src="assets/js/attribution.js" defer></script>
+  <script src="assets/js/random.js" defer></script>
+  <script src="assets/js/colormap.js" defer></script>
+  <script src="assets/js/svg.js" defer></script>
+  <script src="assets/js/prior-demo.js" defer></script>
+  <script src="assets/js/attribution-demo.js" defer></script>
+  <script src="assets/js/sampling-demo.js" defer></script>
+  <script src="assets/data/study1-results.js" defer></script>
+  <script src="assets/js/results.js" defer></script>
+</body>
+</html>
